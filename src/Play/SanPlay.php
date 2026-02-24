@@ -26,7 +26,7 @@ class SanPlay extends AbstractPlay
      * @param string $movetext
      * @param \Chess\Variant\AbstractBoard $board
      */
-    public function __construct(string $movetext, AbstractBoard $board = null)
+    public function __construct(string $movetext, ?AbstractBoard $board = null)
     {
         if ($board) {
             $this->initialBoard = $board;

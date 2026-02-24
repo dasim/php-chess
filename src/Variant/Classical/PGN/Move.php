@@ -39,7 +39,7 @@ class Move extends AbstractNotation
         throw new UnknownNotationException();
     }
 
-    public function toArray(string $color, string $pgn, Square $square, CastlingRule $castlingRule = null): array
+    public function toArray(string $color, string $pgn, Square $square, ?CastlingRule $castlingRule = null): array
     {
         if (preg_match('/^' . static::PIECE . '$/', $pgn)) {
             $sqs = $square->extract($pgn);

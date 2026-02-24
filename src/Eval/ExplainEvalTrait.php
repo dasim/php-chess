@@ -59,7 +59,7 @@ trait ExplainEvalTrait
                 'meaning' => "{$this->subject[1]} {$val}."
             ];
             isset($this->range[1])
-                ? $diff += intdiv($this->range[1] - $this->range[0], count($this->observation) - 1)
+                ? $diff += intdiv((int) ($this->range[1] - $this->range[0]), count($this->observation) - 1)
                 : $diff = $this->range[0];
         }
 

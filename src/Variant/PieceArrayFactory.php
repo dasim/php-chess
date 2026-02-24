@@ -11,7 +11,7 @@ class PieceArrayFactory
     public static function create(
         array $array, 
         AbstractNotation $square, 
-        CastlingRule $castlingRule = null, 
+        ?CastlingRule $castlingRule,
         string $namespace
     ): array
     {

@@ -10,7 +10,7 @@ class LanPlay extends AbstractPlay
 {
     protected array $moves;
 
-    public function __construct(string $movetext, AbstractBoard $board = null)
+    public function __construct(string $movetext, ?AbstractBoard $board = null)
     {
         $this->initialBoard = $board ?? new Board();
         $this->board = $board ?? new Board();
