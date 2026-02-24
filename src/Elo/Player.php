@@ -11,9 +11,9 @@ class Player
         $this->rating = $rating;
     }
 
-    public function setRating(int $rating): Player
+    public function setRating(int|float $rating): Player
     {
-        $this->rating = $rating;
+        $this->rating = (int) $rating;
 
         return $this;
     }

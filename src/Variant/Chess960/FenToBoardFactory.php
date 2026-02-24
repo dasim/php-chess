@@ -21,7 +21,7 @@ class FenToBoardFactory
      * @param string|null $string
      * @return \Chess\Variant\AbstractBoard
      */
-    public static function create(string $string = null): AbstractBoard
+    public static function create(?string $string = null): AbstractBoard
     {
         if (!$string) {
             return new Board((new Shuffle())->shuffle());

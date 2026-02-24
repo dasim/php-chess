@@ -10,7 +10,7 @@ use Chess\Variant\Chess960\RandomPieceArrayFactory;
 
 class Board extends AbstractBoard
 {
-    public function __construct(array $shuffle = null, array $pieces = null, string $castlingAbility = '-')
+    public function __construct(?array $shuffle = null, ?array $pieces = null, string $castlingAbility = '-')
     {
         $this->castlingRule = new CastlingRule($shuffle);
         $this->square = new Square();

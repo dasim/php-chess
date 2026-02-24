@@ -17,7 +17,7 @@ use Chess\Variant\Classical\PGN\Piece;
 
 class Board extends AbstractBoard
 {
-    public function __construct(array $pieces = null)
+    public function __construct(?array $pieces = null)
     {
         $this->square = new Square();
         $this->move = new Move();

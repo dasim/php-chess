@@ -17,7 +17,7 @@ use Chess\Variant\Classical\PGN\Square;
 
 class Board extends AbstractBoard
 {
-    public function __construct(array $pieces = null, string $castlingAbility = '-')
+    public function __construct(?array $pieces = null, string $castlingAbility = '-')
     {
         $this->castlingRule = new CastlingRule();
         $this->square = new Square();
