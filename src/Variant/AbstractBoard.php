@@ -11,6 +11,7 @@ use Chess\Variant\Classical\PGN\Castle;
 use Chess\Variant\Classical\PGN\Color;
 use Chess\Variant\Classical\PGN\Piece;
 use Chess\Variant\Classical\PGN\Move;
+use Chess\Variant\Classical\PGN\Square;
 
 abstract class AbstractBoard extends \SplObjectStorage
 {
@@ -132,6 +133,24 @@ abstract class AbstractBoard extends \SplObjectStorage
     }
 
     /**
+     * Returns the pieces that can legally make a move.
+     *
+     * @param array $move
+     * @return array
+     */
+    protected function legalPieces(array $move): array
+    {
+        $pieces = [];
+        foreach ($this->pick($move) as $piece) {
+            if ($piece->isMovable() && !$piece->isKingLeftInCheck()) {
+                $pieces[] = $piece;
+            }
+        }
+
+        return $pieces;
+    }
+
+    /**
      * Returns true if the move is legal.
      *
      * @param \Chess\Variant\AbstractPiece $piece
@@ -198,33 +217,63 @@ abstract class AbstractBoard extends \SplObjectStorage
     }
 
     /**
-     * Fixes the pseudo-PGN move in the history array after a LAN move is made.
+     * Converts a pseudo-PGN move into canonical PGN using the position before the move.
      *
+     * @param string $color
+     * @param string $lan
+     * @param string $pseudoPgn
+     * @return string
+     */
+    protected function lanToPgn(string $color, string $lan, string $pseudoPgn): string
+    {
+        /** @var Square $square */
+        $square = $this->square;
+        $sqs = $square->explode($lan);
+        if (!isset($sqs[0], $sqs[1])) {
+            return $pseudoPgn;
+        }
+
+        $piece = $this->pieceBySq($sqs[0]);
+        if (!$piece || in_array($piece->id, [Piece::K, Piece::P])) {
+            return $pseudoPgn;
+        }
+
+        /** @var Move $moveNotation */
+        $moveNotation = $this->move;
+        $move = $moveNotation->toArray($color, $pseudoPgn, $square, $this->castlingRule);
+        $move['from'] = '';
+        $sameFile = false;
+        $sameRank = false;
+        $ambiguous = false;
+        foreach ($this->legalPieces($move) as $candidate) {
+            if ($candidate->sq === $piece->sq) {
+                continue;
+            }
+            $ambiguous = true;
+            $sameFile = $sameFile || $candidate->file() === $piece->file();
+            $sameRank = $sameRank || $candidate->rank() === $piece->rank();
+        }
+
+        $disambiguation = '';
+        if ($ambiguous) {
+            $disambiguation = !$sameFile
+                ? $piece->file()
+                : (!$sameRank ? $piece->rank() : $piece->sq);
+        }
+        $x = str_contains($pseudoPgn, 'x') ? 'x' : '';
+
+        return $piece->id . $disambiguation . $x . $sqs[1];
+    }
+
+    /**
+     * Stores the canonical PGN in the history array after a LAN move is made.
+     *
+     * @param string $pgn
      * @return bool
      */
-    protected function onPlayLan(): bool
+    protected function onPlayLan(string $pgn): bool
     {
-        // undo the double disambiguation
-        $last = $this->history[count($this->history) - 1];
-        $sqs = $this->square->explode($last['pgn']);
-        if (isset($sqs[0]) && isset($sqs[1])) {
-            if ($piece = $this->pieceBySq($sqs[1])) {
-                $disambiguation = $sqs[0];
-                $x = str_contains($last['pgn'], 'x') ? 'x' : '';
-                foreach ($piece->defending() as $defending) {
-                    if ($defending->id === $piece->id) {
-                        $file = $sqs[0][0];
-                        $rank = (int) substr($sqs[0], 1);
-                        $disambiguation = $file  === $defending->file()
-                            ? str_replace($file , '', $disambiguation)
-                            : str_replace($rank, '', $disambiguation);
-                    }
-                }
-                $this->history[count($this->history) - 1]['pgn'] = $disambiguation === $sqs[0]
-                    ? $piece->id . $x . $sqs[1]
-                    : $piece->id . $disambiguation . $x . $sqs[1];
-            }
-        }
+        $this->history[count($this->history) - 1]['pgn'] = $pgn;
         // add the notation for check and checkmate to the move
         if ($this->isMate()) {
             $this->history[count($this->history) - 1]['pgn'] .= '#';
@@ -395,13 +444,8 @@ abstract class AbstractBoard extends \SplObjectStorage
     public function play(string $color, string $pgn): bool
     {
         if ($color === $this->turn) {
-            $pieces = [];
             $move = $this->move->toArray($color, $pgn, $this->square, $this->castlingRule);
-            foreach ($this->pick($move) as $piece) {
-                if ($piece->isMovable() && !$piece->isKingLeftInCheck()) {
-                    $pieces[] = $piece;
-                }
-            }
+            $pieces = $this->legalPieces($move);
             if ($piece = $this->disambiguate($move, $pieces)) {
                 return $this->isLegal($piece);
             }
@@ -420,9 +464,10 @@ abstract class AbstractBoard extends \SplObjectStorage
     public function playLan(string $color, string $lan): bool
     {
         if ($color === $this->turn) {
-            if ($pgn = $this->lanToPseudoPgn($color, $lan)) {
-                if ($this->play($color, $pgn)) {
-                    return $this->onPlayLan();
+            if ($pseudoPgn = $this->lanToPseudoPgn($color, $lan)) {
+                $pgn = $this->lanToPgn($color, $lan, $pseudoPgn);
+                if ($this->play($color, $pseudoPgn)) {
+                    return $this->onPlayLan($pgn);
                 }
             }
         }

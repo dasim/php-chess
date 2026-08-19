@@ -1481,6 +1481,17 @@ class BoardTest extends AbstractUnitTestCase
     /**
      * @test
      */
+    public function play_lan_does_not_disambiguate_with_a_rook_blocked_before_the_move()
+    {
+        $board = FenToBoardFactory::create('5rk1/6p1/7p/p3rp2/2R1P3/2R4P/P3B1P1/4n1K1 w - f6 0 36');
+
+        $this->assertTrue($board->playLan('w', 'c3c1'));
+        $this->assertSame('Rc1', $board->history[0]['pgn']);
+    }
+
+    /**
+     * @test
+     */
     public function play_h4_a5_h5_g5()
     {
         $board = new Board();
