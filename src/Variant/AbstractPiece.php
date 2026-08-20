@@ -380,7 +380,7 @@ abstract class AbstractPiece
             }
         }
         if ($search) {
-            $this->board->castlingAbility = str_replace($search, '', $this->board->castlingAbility) 
+            $this->board->castlingAbility = str_replace(str_split($search), '', $this->board->castlingAbility)
                 ?: CastlingRule::NEITHER;
         }
 

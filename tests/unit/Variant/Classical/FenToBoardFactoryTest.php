@@ -11,6 +11,28 @@ class FenToBoardFactoryTest extends AbstractUnitTestCase
     /**
      * @test
      */
+    public function king_move_removes_only_long_castling_ability()
+    {
+        $board = FenToBoardFactory::create('4k3/8/8/8/8/8/8/R3K3 w Q - 0 1');
+
+        $this->assertTrue($board->playLan('w', 'e1d2'));
+        $this->assertSame('4k3/8/8/8/8/8/3K4/R7 b - - 1 1', $board->toFen());
+    }
+
+    /**
+     * @test
+     */
+    public function castling_removes_only_short_castling_ability()
+    {
+        $board = FenToBoardFactory::create('4k3/8/8/8/8/8/8/R3K2R w K - 0 1');
+
+        $this->assertTrue($board->playLan('w', 'e1g1'));
+        $this->assertSame('4k3/8/8/8/8/8/8/R4RK1 b - - 1 1', $board->toFen());
+    }
+
+    /**
+     * @test
+     */
     public function foo_throws_exception()
     {
         $this->expectException(UnknownNotationException::class);
