@@ -202,7 +202,7 @@ class K extends AbstractPiece
             $this->board->attach(
                 new K(
                     $this->color,
-                    $this->board->castlingRule->rule[$this->color][rtrim($this->move['pgn'], '+')][2][1],
+                    $this->board->castlingRule->rule[$this->color][$type][2][1],
                     $this->board->square
                 )
              );
@@ -210,7 +210,7 @@ class K extends AbstractPiece
             $this->board->attach(
                 new R(
                     $rook->color,
-                    $this->board->castlingRule->rule[$this->color][rtrim($this->move['pgn'], '+')][3][1],
+                    $this->board->castlingRule->rule[$this->color][$type][3][1],
                     $this->board->square
                 )
             );

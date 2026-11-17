@@ -1830,4 +1830,28 @@ class BoardTest extends AbstractUnitTestCase
         $this->assertEquals($expected, $board->legal('f5'));
         $this->assertFalse($board->play('w', 'fxe6'));
     }
+
+    /**
+     * @test
+     */
+    public function castle_short_with_checkmate()
+    {
+        $board = FenToBoardFactory::create('4rkr1/4p1p1/8/8/8/8/8/4K2R w K - 0 1');
+
+        $this->assertTrue($board->play('w', 'O-O#'));
+        $this->assertSame('4rkr1/4p1p1/8/8/8/8/8/5RK1 b - - 1 1', $board->toFen());
+        $this->assertTrue($board->isMate());
+    }
+
+    /**
+     * @test
+     */
+    public function castle_long_with_checkmate()
+    {
+        $board = FenToBoardFactory::create('2rkr3/2p1p3/8/8/8/8/8/R3K3 w Q - 0 1');
+
+        $this->assertTrue($board->play('w', 'O-O-O#'));
+        $this->assertSame('2rkr3/2p1p3/8/8/8/8/8/2KR4 b - - 1 1', $board->toFen());
+        $this->assertTrue($board->isMate());
+    }
 }
